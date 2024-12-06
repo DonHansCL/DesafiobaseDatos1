@@ -1,0 +1,104 @@
+Desafio Like Me
+
+1. Crear Base de datos:
+
+CREATE DATABASE likeme;
+
+2. Crear Tabla:
+
+CREATE TABLE posts (id SERIAL, titulo VARCHAR(25), img VARCHAR(1000), descripcion VARCHAR(255), likes INT);
+
+3. Crear carpeta Backend en LikeMe y carpeta frontend, muevo todo lo que dan para el desafio a la carpeta del frontend y la abro en la terminar y doy npm install.
+
+4. Crear archivo server.js en carpeta Backend, Creo el archivo .env en backend, creo la carpeta db y dentro de ella el archivo db.js, además creo el archivo consultas.js donde creo las funciones que llamo en el server.js
+5. Abrir carpeta backend en terminal
+
+6. npm init -y para crear el package.json
+
+7. npm install pg, npm i express, npm i cors, npm i dotenv
+
+8. en el archivo .env creo la conexión:
+
+PORT = 3000
+
+PGUSER=postgres
+PGPASSWORD=*****
+PGHOST=localhost 
+PGPORT=5432 
+PGDATABASE=likeme
+
+9. en el archivo db.js creo lo siguiente:
+
+const { Pool } = require('pg')
+
+const pool = new Pool()
+
+module.exports = { query: (text, params) => pool.query(text, params) }
+
+10. Creo las funciones en el archivo consultas.js en la carpeta Backend, por ahora no creare otra carpeta.
+
+const db = require('./db/db')
+
+const obtenerPost = async() => {
+    const {rows} = await db.query("SELECT * FROM posts");
+    console.log(rows)
+    return rows
+}
+
+const agregarPost = async(titulo, img, descripcion, likes) => {
+    const consulta = "INSERT INTO posts VALUES(DEFAULT, $1, $2, $3, $4)";
+    const values = [titulo, img, descripcion, likes];
+    const result = await db.query(consulta, values)
+    console.log("Post agregado")
+}
+
+
+module.exports = { agregarPost, obtenerPost }
+
+11. Ahora en el archivo server.js procedo a importar lo necesario, configurar CORS para que acepte las peticiones del frontend y  hacer las rutas:
+
+require('dotenv').config()
+const { obtenerPost, agregarPost } = require('./consultas')
+
+const express = require('express')
+const cors = require('cors')
+
+const app = express()
+
+
+app.use(cors({
+    origin: 'http://localhost:5173', // Permitir solo tu frontend
+    methods: ['GET', 'POST'], // Métodos permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
+}))
+app.use(express.json())
+
+
+app.get("/posts", async (req, res) => {
+    
+        const posts = await obtenerPost();
+        res.json(posts);
+      
+    })
+
+app.post("/posts", async (req, res) => {
+   
+        const { titulo, img, descripcion } = req.body;
+        await agregarPost(titulo, img, descripcion);
+        res.status(201).send("Post agregado con éxito");
+    
+})
+
+
+const port = process.env.PORT || 3000  // se pone el || 3000 en caso que no tome el puerto del .env
+app.listen(port, () => {
+    console.log(`el servidor está corriendo en el puerto ${port}`)
+})
+
+12. en el frontend hay un error en el archivo App.jsx ya que en la linea 20 no viene el nombre del campo de la tabla creada sino url y hay que cambiarlo para que grabe le url de la imagen y la puedas ver. Quedaria de la siguiente manera:
+
+ const post = { titulo, img: imgSrc, descripcion };
+
+FIN
+
+

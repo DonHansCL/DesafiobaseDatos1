@@ -1,7 +1,7 @@
 function Post({
   post: { id, titulo, img, descripcion, likes },
   like,
-  eliminarPost,
+  eliminarPost,  iniciarEdicion,
 }) {
   return (
     <div className="card col-12 col-sm-4 d-inline mx-0 px-3">
@@ -9,6 +9,9 @@ function Post({
         <img
           className="card-img-top "
           src={img}
+          alt={titulo}
+          style={{ cursor: "pointer" }}
+          onClick={() => iniciarEdicion({ id, titulo, img, descripcion, likes })}
         />
         <div className="p-3">
           <h4 className="card-title">{titulo}</h4>
